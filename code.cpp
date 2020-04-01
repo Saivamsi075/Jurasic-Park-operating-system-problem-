@@ -1,5 +1,8 @@
 #include<iostream>
 #include<vector>
+#include<ctime>
+#include<stdlib.h>
+
 using namespace std;
 
 class cars
@@ -18,14 +21,18 @@ class cars
     }
 };
 
+int Random()
+{
+    srand(time(0)*rand());
+    return rand()%10 +1;
+}
+
 int main()
 {
     int t;  //test cases
     int n;  //number of safari cars
     int m;  //number of passengers wandering in the museum
     int q;  //number of passengers in park gate
-    int p;  //passenger rides for time p
-    int r;  //after every r units of time one passenger from museum adds to q
     int k;  //jurassic park remains open for
 
     int pc; //passengers who have completed park rid
@@ -36,7 +43,7 @@ int main()
 
     while(t--)
     {
-        cin>>n>>m>>q>>p>>r>>k;
+        cin>>n>>m>>q>>k;
 
         vector<cars> car;
         car.resize(n);
@@ -50,7 +57,7 @@ int main()
         //process cars while time remains
         while(ck<=k)
         {
-                if(m>0 && ck%r==0)
+                if(m>0 && ck%Random()==0)
                 {
                     q++;
                     m--;
@@ -72,7 +79,7 @@ int main()
                 {
                     car[ci].loaded=true;
                     car[ci].startTime=ck;
-                    car[ci].endTime=ck+p;
+                    car[ci].endTime=ck+Random();
 
                     q--;
                     cl++;
