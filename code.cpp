@@ -1,97 +1,122 @@
+
 #include<iostream>
+#include<thread>
 #include<vector>
 #include<ctime>
+#include<chrono>
 #include<stdlib.h>
 
 using namespace std;
 
 class cars
 {
-    public:
+public:
 
-    bool loaded;
-    int startTime;
-    int endTime;
+	bool loaded;
+	int startTime;
+	int endTime;
 
-    cars()
-    {
-        loaded=false;
-        startTime=-1;
-        endTime=-1;
-    }
+	cars()
+	{
+		loaded = false;
+		startTime = -1;
+		endTime = -1;
+	}
 };
 
-int Random()
+int Random(int n)
 {
-    srand(time(0)*rand());
-    return rand()%10 +1;
+	srand(time(0) * rand());
+	return 1 + (rand() % n);
+}
+
+static bool Exit = true;
+
+void Process(int n,int m)
+{
+	using namespace std::literals::chrono_literals;
+
+	int semaphore_n, semaphore_m;
+	semaphore_n = n;
+	semaphore_m = m;
+
+	vector<cars> car;
+	car.resize(n);
+
+	//int pw = semaphore_m / 2;//passengers wandering in museum. Initially half the passengers
+	int pq = 0;
+	int clk = 1;
+	int cr = 0;//completed rides
+	int r = 1;
+
+	//process cars while time remains
+	while (Exit)
+	{
+		if (r == clk)
+		{
+			while(semaphore_m > 0)
+			{
+					pq++;
+					semaphore_m--;
+			}
+			r = clk + Random(10);
+		}
+		
+		for (int i = 0; i < n; i++)
+		{
+
+			if (car[i].loaded && car[i].endTime == clk)
+			{
+				car[i] = cars();
+
+				cr++;
+				semaphore_n++;
+				semaphore_m++;
+			}
+
+			if (pq > 0 && !car[i].loaded)
+			{
+				car[i].loaded = true;
+				car[i].startTime = clk;
+				car[i].endTime = clk + Random(10);
+
+
+				pq--;
+				semaphore_n--;
+			}
+
+		}
+
+		cout << endl << endl <<"Passengers wandering : "<<semaphore_m<<"   Passengers in queue : "<<pq<<"   Passengers in ride : "<< m - semaphore_m - pq << endl;
+		cout << "cars in ride : "<<n-semaphore_n <<"   cars waiting : "<<semaphore_n<<"   Rides completed : "<<cr<< endl;
+
+		this_thread::sleep_for(1s);
+
+		clk++;
+
+	}
+
 }
 
 int main()
 {
-    int t;  //test cases
-    int n;  //number of safari cars
-    int m;  //number of passengers wandering in the museum
-    int q;  //number of passengers in park gate
-    int k;  //jurassic park remains open for
+	int n;  //number of safari cars
+	int m;  //number of passengers wandering in the museum
 
-    int pc; //passengers who have completed park rid
-    int cw; //cars waiting
-    int cl; //cars loaded
+	cout << "Enter number of single-passenger cars : ";
+	cin >> n;
+	cout << "Enter number of passengers : ";
+	cin >> m;
+	cin.ignore();
 
-    cin>>t;
+	thread exec(Process,n,m);
 
-    while(t--)
-    {
-        cin>>n>>m>>q>>k;
+	cin.get();
+	Exit = false;
+	cout << "Process stopped!" << endl << "press enter to exit." << endl;
 
-        vector<cars> car;
-        car.resize(n);
+	exec.join();
 
-        int ck=1;
-
-        cw=n;
-        cl=0;
-        pc=0;
-
-        //process cars while time remains
-        while(ck<=k)
-        {
-                if(m>0 && ck%Random()==0)
-                {
-                    q++;
-                    m--;
-                }
-
-            for(int ci=0;ci<n;ci++)
-            {
-
-               if(car[ci].loaded && car[ci].endTime==ck)
-                {
-                    car[ci]= cars();
-
-                    pc++;
-                    cw++;
-                    cl--;
-                }
-
-                if(q>0 && !car[ci].loaded)
-                {
-                    car[ci].loaded=true;
-                    car[ci].startTime=ck;
-                    car[ci].endTime=ck+Random();
-
-                    q--;
-                    cl++;
-                    cw--;
-                }
-
-
-            }
-
-            ck++;
-        }
-
-        cout<<cw<<" "<<pc<<" "<<m<<" "<<q<<endl;
-    }
+	cin.get();
+	return 0;
 }
