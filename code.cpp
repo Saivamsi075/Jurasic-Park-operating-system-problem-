@@ -1,4 +1,3 @@
-
 #include<iostream>
 #include<thread>
 #include<vector>
@@ -43,7 +42,6 @@ void Process(int n,int m)
 	vector<cars> car;
 	car.resize(n);
 
-	//int pw = semaphore_m / 2;//passengers wandering in museum. Initially half the passengers
 	int pq = 0;
 	int clk = 1;
 	int cr = 0;//completed rides
@@ -103,10 +101,24 @@ int main()
 	int n;  //number of safari cars
 	int m;  //number of passengers wandering in the museum
 
+	re_enter_n:
 	cout << "Enter number of single-passenger cars : ";
 	cin >> n;
-	cout << "Enter number of passengers : ";
+	if (n < 0)
+	{
+		cout << endl<<"Enter valid number of Single-passenger cars "<<endl;
+		cout << endl;
+		goto re_enter_n;
+	}
+	re_enter_m:
+	cout << "Enter number of Passengers : ";
 	cin >> m;
+	if (m < 0)
+	{
+		cout << endl << "Enter valid number of Passengers " << endl;
+		cout << endl;
+		goto re_enter_m;
+	}
 	cin.ignore();
 
 	thread exec(Process,n,m);
